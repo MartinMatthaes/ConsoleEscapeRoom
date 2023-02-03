@@ -21,6 +21,7 @@
     public static bool heightCompatible = false;
     public static bool successWidth = false;
     public static bool successHeight = false;
+
     // PROGRAM SETTINGS
     public static int option;
     public static bool gameOver = false;
@@ -40,11 +41,13 @@
 
     public static void Main(string[] args)
     {
-        Console.Title = "Escape Room";
-        Console.CursorVisible = false;
-        EscapeRoom(); // RUN GAME
+        Console.Title = "Escape Room"; // Set the console title
+        Console.CursorVisible = false; // Hide the cursor for better UI
+        EscapeRoom(); // Run the main game logic
     }
 
+
+    // Main logic
     public static void EscapeRoom()
     {
         Console.Clear();
@@ -61,7 +64,8 @@
 
             if (option == 1)
             {
-                whichSideDoor = rnd.Next(1, 2); //1=leftWall; 2=rightWall; 3=topWall; 4=bottomWall;
+                // Determines the location of the door neext to one of the four walls of the map
+                whichSideDoor = rnd.Next(1, 5); //1=leftWall; 2=rightWall; 3=topWall; 4=bottomWall;
                 switch (whichSideDoor)
                 {
                     case 1:
@@ -85,6 +89,7 @@
                         yPositionDoor = rnd.Next(1, mapHeight - 1);
                         break;
                 }
+                // Determines the location of the player and the key
                 yPositionPlayer = rnd.Next(1, mapWidth - 1);
                 xPositionPlayer = rnd.Next(1, mapHeight - 1);
                 xPositionKey = rnd.Next(1, mapWidth - 1);
@@ -117,42 +122,47 @@
                         xPositionKey = rnd.Next(1, mapWidth - 1);
                         yPositionKey = rnd.Next(1, mapHeight - 1);
                     }
-                } while ((yPositionPlayer == xPositionKey && xPositionPlayer == yPositionKey) || (yPositionPlayer == xPositionDoor && xPositionPlayer == yPositionDoor) || (xPositionKey == xPositionDoor && yPositionKey == yPositionDoor));
+                } while (
+                    (yPositionPlayer == yPositionKey && xPositionPlayer == xPositionKey) || 
+                    (yPositionPlayer == yPositionDoor && xPositionPlayer == xPositionDoor) || 
+                    (xPositionKey == xPositionDoor && yPositionKey == yPositionDoor));
 
-
-                DrawMap(MapArray, xPositionKey, yPositionKey, keyFound, xPositionDoor, yPositionDoor);
-
+            // Draw the map to the console
+            DrawMap(MapArray, xPositionKey, yPositionKey, keyFound, xPositionDoor, yPositionDoor);
+                // Movement logic
                 do
                 {
-                    if (Console.WindowHeight < mapHeight || Console.WindowWidth < mapWidth)
+                    // Check if console is big enough
+                    if (Console.WindowHeight <= mapHeight || Console.WindowWidth <= mapWidth)
                     {
                         consoleSizeError = true;
                         gameOver = true;
                         break;
                     }
 
+                    // Movement logic using switch-statement with arrow-keys and WASD
+                    // To exit Escape or Enter
                     consoleKey = Console.ReadKey(true);
-
                     switch (consoleKey.Key)
                     {
                         case ConsoleKey.UpArrow:
                         case ConsoleKey.W:
-                            xPositionPlayer--;
+                            yPositionPlayer--;
                             break;
 
                         case ConsoleKey.DownArrow:
                         case ConsoleKey.S:
-                            xPositionPlayer++;
+                            yPositionPlayer++;
                             break;
 
                         case ConsoleKey.LeftArrow:
                         case ConsoleKey.A:
-                            yPositionPlayer--;
+                            xPositionPlayer--;
                             break;
 
                         case ConsoleKey.RightArrow:
                         case ConsoleKey.D:
-                            yPositionPlayer++;
+                            xPositionPlayer++;
                             break;
 
                         case ConsoleKey.Escape:
@@ -162,25 +172,33 @@
                             break;
                     }
 
-                    // CHECK IF PLAYER RUNS INTO BORDER
+                    // Check if the player runs into the border
                     if (yPositionPlayer < 1) yPositionPlayer = 1;
                     if (xPositionPlayer < 1) xPositionPlayer = 1;
                     if (yPositionPlayer >= mapWidth - 1) yPositionPlayer = mapWidth - 2;
                     if (xPositionPlayer >= mapHeight - 1) xPositionPlayer = mapHeight - 2;
 
+                    // Move the player
                     MapArray = MovePlayer(MapArray, xPositionPlayer, yPositionPlayer);
 
-                    if (xPositionKey == yPositionPlayer && yPositionKey == xPositionPlayer)
+                    // If key is found set keyFound to true
+                    if (xPositionKey == xPositionPlayer && yPositionKey == yPositionPlayer)
                     {
                         keyFound = true;
                         Console.Beep(440, 250);
                     }
 
-                    if (keyFound && xPositionDoor == yPositionPlayer && yPositionDoor == xPositionPlayer) gameOver = true;
+                    // If key is found and player is on the door end the game
+                    if (keyFound && xPositionDoor == xPositionPlayer && yPositionDoor == yPositionPlayer) gameOver = true;
 
+
+                    // DrawMap with updated positions after 1 cycle
                     DrawMap(MapArray, xPositionKey, yPositionKey, keyFound, xPositionDoor, yPositionDoor);
+
+                    // Continue loop until gameOver = true;
                 } while (!gameOver);
 
+                // Check for Console-Size-Error
                 if (consoleSizeError)
                 {
                     Console.WriteLine("Console window is too small.");
@@ -195,6 +213,7 @@
                 gameOver = false;
                 keyFound = false;
 
+                // If player did not quit
                 if (!quit)
                 {
                     Console.Clear();
@@ -210,7 +229,7 @@
                 Console.Clear();
                 PrintTitle();
 
-                // CHANGING MAP WIDHT
+                // Changing the map width
                 do
                 {
                     Console.WriteLine($"To change the width choose a number between {minMapWidth} and {maxMapWidth}. Currently set to {mapWidth}");
@@ -223,9 +242,10 @@
                         widthCompatible = true;
                         mapWidth = consoleInputWidth;
                     }
+                    // Do loop until the width is acceptable
                 } while (!widthCompatible);
 
-                // CHANGING MAP HEIGHT
+                // Changing the map height
                 do
                 {
                     Console.WriteLine($"To change the height choose a number between {minMapHeight} and {maxMapHeight}. Currently set to {mapHeight}");
@@ -238,14 +258,15 @@
                         heightCompatible = true;
                         mapHeight = consoleInputHeight;
                     }
+                    // Do loop until the height is acceptable
                 } while (!heightCompatible);
 
             }
+            // Print the tutorial
             else if (option == 3)
             {
                 Console.Clear();
                 PrintTitle();
-
                 Console.WriteLine("Tutorial for the game:\n\n");
                 Console.WriteLine($"To move your player ({player}) use W, A, S, D or the arrow keys on your keyboard.\n");
                 Console.WriteLine($"To beat the EscapeRoom you need to escape and walk through a door: ({door})\n");
@@ -255,14 +276,18 @@
                 Console.WriteLine("Press any key to return to the menu..\n");
                 Console.ReadKey();
             }
+            // Quit the game with Exitcode 0
             else if (option == 4)
             {
                 Console.Clear();
                 Environment.Exit(0);
             }
             else { option = 0; }
+            // Do loop as long as option is not 4 (quit program)
         } while (option != 4);
     }
+    
+    // Prints the title
     public static void PrintTitle()
     {
         Console.WriteLine("\n\n");
@@ -274,6 +299,8 @@
         Console.WriteLine("╚══════╝╚═════╝░░╚════╝░╚═╝░░╚═╝╚═╝░░░░░╚══════╝  ╚═╝░░╚═╝░╚════╝░░╚════╝░╚═╝░░░░░╚═╝");
         Console.WriteLine("\n\n");
     }
+    
+    // Prints the options
     public static void PrintOptions()
     {
         Console.WriteLine("Please choose one of the following options...\n");
@@ -286,62 +313,67 @@
 
     private static int prevX = -1, prevY = -1;
 
+    // Moves the player by updating the position and removing the previous position
     private static char[,] MovePlayer(char[,] MapArray, int xPosition, int yPosition)
     {
-        if (prevY > -1 && prevX > -1)
+        // Check if previous position of the player is valid
+        if (prevX > -1 && prevY > -1)
         {
+            // Remove the player from the previous position
             MapArray[prevY, prevX] = ' ';
         }
+        // Update the player's new position
         MapArray[yPosition, xPosition] = player;
 
-        prevY = yPosition;
+        // Store the new position as the previous position for the next move
         prevX = xPosition;
+        prevY = yPosition;
 
         return MapArray;
     }
 
+    // Draws the map on the console
     private static void DrawMap(char[,] MapArray, int keyX, int keyY, bool keyFound, int doorX, int doorY)
     {
-        for (var x = 0; x < MapArray.GetLength(0); x++)
+        // Loop through the entire map and draw each element on the console
+        for (var y = 0; y < MapArray.GetLength(0); y++)
         {
-            for (var y = 0; y < MapArray.GetLength(1); y++)
+            for (var x = 0; x < MapArray.GetLength(1); x++)
             {
                 Console.SetCursorPosition(x, y);
-                Console.Write(MapArray[x, y]);
+                Console.Write(MapArray[y, x]);
             }
         }
 
+        // Draw the key if it hasn't been found yet
         if (!keyFound)
         {
             Console.SetCursorPosition(keyX, keyY);
             Console.Write(key);
         }
 
+        // Draw the door
         Console.SetCursorPosition(doorX, doorY);
         Console.Write(door);
     }
 
+
     private static char[,] InitializeMap(int mapWidth, int mapHeight)
     {
+        // Create array with width and height
         char[,] MapArray = new char[mapWidth, mapHeight];
 
+        // Create top and bottom of map
         for (int i = 0; i < mapWidth; i++)
         {
             MapArray[i, 0] = border;
-        }
-
-        for (int i = 0; i < mapWidth; i++)
-        {
             MapArray[i, mapHeight - 1] = border;
         }
 
+        // Create left and right of map
         for (int i = 0; i < mapHeight; i++)
         {
             MapArray[0, i] = border;
-        }
-
-        for (int i = 0; i < mapHeight; i++)
-        {
             MapArray[mapWidth - 1, i] = border;
         }
 
@@ -349,3 +381,4 @@
     }
 }
 
+    
